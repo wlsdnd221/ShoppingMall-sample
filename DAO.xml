@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ezen.prosample.Service">
+<!-- 상품등록 -->
+<insert id="enroll">
+	insert into projectsample values(projectsample_seq.nextval, #{param1}, #{param2}, #{param3}, #{param4}, #{param5}, #{param6})
+</insert>
+<!-- 모든 상품목록 -->
+<select id="all_list" resultType="com.ezen.prosample.SangpumDTO">
+	select * from projectsample order by num desc
+</select>
+<!-- 할인적용 -->
+<update id="discount">
+	update projectsample set price=price*#{param2} where num=#{param1}
+</update>
+
+<!-- 분류별 목록 -->
+<select id="lista" resultType="com.ezen.prosample.SangpumDTO">
+	select * from projectsample where sort=#{param1} 
+	order by num desc
+</select>
+<!-- 자세히보기 -->
+<select id="detail" resultType="com.ezen.prosample.SangpumDTO">
+	select * from projectsample where num=#{param1}
+</select>
+<!-- 상품삭제 -->
+<delete id="delete">
+	delete from projectsample where num=#{param1}
+</delete>
+<!-- 상품수정 -->
+<update id="modify">
+	update projectsample set sort=#{param1}, name=#{param2}, purity=#{param3}, price=#{param4}, content=#{param5}, picture=#{param6} where num=#{param7}
+</update>
+<!-- 상품검색 -->
+<select id="searchnum" resultType="com.ezen.prosample.SangpumDTO">
+	select * from projectsample where num=#{param1} 
+</select>
+<select id="searchname" resultType="com.ezen.prosample.SangpumDTO">
+	select * from projectsample where name like '%' || #{param1} || '%' 
+	order by num desc
+</select>
+
+
+<!-- 로그인 -->
+<select id="login" resultType="com.ezen.prosample.MemberDTO">
+	select * from member1 where id=#{param1} and pw=#{param2}
+</select>
+<!-- 회원가입 -->
+<insert id="application">
+	insert into member1 values(#{param1}, #{param2}, #{param3}, #{param4})
+</insert>
+
+
+<!-- 게시판목록 -->
+<select id="boardlist" resultType="com.ezen.prosample.BoardDTO">
+	select * from board order by reproot desc, repstep asc
+</select>
+<!-- 게시판등록 -->
+<insert id="boardenroll">
+	insert into board(num, author, title, content, readcnt, reproot, repstep, repindent) 
+	values(board_seq.nextval, #{param1}, #{param2}, #{param3}, 0, board_seq.currval, 0, 0)
+</insert>
+<!-- 게시판자세히보기 -->
+<update id="readcnt">
+	update board set readcnt=readcnt+1 where num=#{param1}
+</update>
+<select id="boarddetail" resultType="com.ezen.prosample.BoardDTO">
+	select * from board where num=#{param1}
+</select>
+<!-- 게시판 삭제 -->
+<delete id="boarddelete">
+	delete from board where num=#{param1}
+</delete>
+<!-- 게시판 수정 -->
+<update id="boardmodify">
+	update board set author=#{param1}, title=#{param2}, content=#{param3} where num=#{param4}
+</update>
+<!-- 게시판 답글달기 -->
+<update id="repstep">
+	update board set repstep=repstep+1 where reproot=#{param1} and repstep>#{param2}
+</update>
+<insert id="boardreply">
+	insert into board(num, author, title, content, readcnt, reproot, repstep, repindent) 
+	values(board_seq.nextval, #{param1}, #{param2}, #{param3}, 0, #{param4}, #{param5}, #{param6})
+</insert>
+<!-- 게시판 검색 -->
+<select id="board_searchtitle" resultType="com.ezen.prosample.BoardDTO">
+	select * from board where title like '%' || #{param1} || '%'
+</select>
+<select id="board_searchauthor" resultType="com.ezen.prosample.BoardDTO">
+	select * from board where author like '%' || #{param1} || '%'
+</select>
+
+
+<!-- 페이징연습 -->
+<select id="cntnotice" resultType="int">
+	select count(*) from board
+</select>
+<select id="selectnotice" resultType="com.ezen.prosample.BoardDTO">
+	SELECT  * FROM (
+					select rownum rn,A.* from( 
+						select num,author,title,content,to_char(writeday,'yyyy-mm-dd')writeday,readcnt,reproot,repstep,repindent from board ORDER BY reproot DESC,repstep asc)A)
+		WHERE rn BETWEEN #{start} AND #{end}
+</select>
+<!-- 모든 상품목록 페이징연습 -->
+<select id="totalrecord" resultType="int">
+	select count(*) from projectsample
+</select>
+<select id="page_all_lista" resultType="com.ezen.prosample.SangpumDTO">
+	select * from( 
+		select rownum rn,B.* FROM( 
+			select num,sort,name,purity,price,content,picture from projectsample order by num desc)B) 
+	WHERE rn BETWEEN #{start} AND #{end}
+</select>
+<!-- 상품목록 페이징연습
+<select id="totalrecord1" resultType="int">
+	select count(*) from projectsample where sort=#{param1}
+</select>
+<select id="page_lista" resultType="com.ezen.prosample.SangpumDTO">
+	select * from( 
+		select rownum rn,B.* FROM( 
+			select num,name,price,picture from projectsample where sort=#{param2} order by num desc)B) 
+	WHERE rn BETWEEN #{start} AND #{end}
+</select>
+-->
+
+<!-- 메인화면 공지사항 -->
+<select id="mainboard" resultType="com.ezen.prosample.BoardDTO">
+	select num,title from ( 
+		select rownum rn,A.* from( 
+			select num,title from board where repstep=0 order by num desc)A) 
+	WHERE rn BETWEEN 1 AND 5
+</select>
+</mapper>
